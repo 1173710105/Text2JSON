@@ -7,4 +7,4 @@ Environment:
     numpy: 1.14.3 or higher
     transformers: 2.5.1 or higher
     chinese2digits: 4.0.2 or higher
-
+    cuda: 9.2 or higher
