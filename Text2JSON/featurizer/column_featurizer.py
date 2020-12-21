@@ -1,5 +1,6 @@
 import sys
 from os.path import dirname, abspath
+
 path = dirname(dirname(dirname(abspath(__file__))))
 sys.path.append(path)
 import numpy as np
@@ -240,7 +241,7 @@ class HydraColumnFeaturizer(object):
         return input_feature
 
     def get_input_column_feature(self, example: SQLExample, schema: schema_parsed, config, positive=True, negative=True,
-                          note=False):
+                                 note=False):
         """
             example 是一条完整的train数据
             example:
@@ -335,9 +336,12 @@ class HydraColumnFeaturizer(object):
             for table_column_feature in table[feature_type]:
                 # 编码，输入为type, table, column, table_note, column_note, space, token
                 # 输出[cls]type, table, column, table_note, column_note, space[SEP]question[SEP]
-                assert len(table_column_feature) <= max_column_length, "列特征长度过小，请将配置文件中的max_column_length增大"
-                assert len(''.join(tokens)) <= max_query_length, "输入问句长度大于最大字符长度，请将配置文件中的max_query_length" \
-                                                                 "增大或者缩短输入问句长度"
+                assert len(
+                    table_column_feature) <= max_column_length, "{0} URL中参数特征长度过大，请缩小参数参数特征或将配置文件中的" \
+                                                                "max_column_length增大".format(table['url'])
+                assert len(''.join(
+                    tokens)) <= max_query_length, '问句: {0} 输入问句长度大于最大字符长度，请将配置文件中的max_query_length' \
+                                                  '增大或者缩短输入问句长度'.format(example.question)
                 tokenize_result = self.tokenizer.encode_plus(
                     table_column_feature,
                     tokens,
@@ -381,8 +385,9 @@ class HydraColumnFeaturizer(object):
         return input_feature
 
     # 填充特征
-    def fill_label_column_feature_split(self, example: SQLExample, input_feature: ColumnInputFeature, schema: schema_parsed, config,
-                                 positive=True, negative=True):
+    def fill_label_column_feature_split(self, example: SQLExample, input_feature: ColumnInputFeature,
+                                        schema: schema_parsed, config,
+                                        positive=True, negative=True):
         """
             example:
             {
@@ -496,7 +501,7 @@ class HydraColumnFeaturizer(object):
                         input_feature.value_start[global_id][value_index] = s
                         # -1 有可能导致大问题，后面看怎么用, 与span那里的l-1对应上了
                         # 这里-1 是预测的开始位置token，与word_to_subword和subword_to_word相对应
-                        e = input_feature.word_to_subword[global_id][se[1]][1]-1  # 获取在编码过后的end_token
+                        e = input_feature.word_to_subword[global_id][se[1]][1] - 1  # 获取在编码过后的end_token
                         input_feature.value_end[global_id][value_index] = e
 
                         # 断言，start_token 和 end_token 的位置均少于编码长度，并且对应input_mask位置的一个token
@@ -633,7 +638,7 @@ class ColumnDataset(torch_data.Dataset):
         self.model_inputs = None
         self.pos = None
 
-    def loads(self, data_paths,  include_label=False, positive=True, negative=True, note=False):
+    def loads(self, data_paths, include_label=False, positive=True, negative=True, note=False):
         self.input_features, self.model_inputs, self.pos = self.featurizer.load_data(data_paths, self.config,
                                                                                      self.schema, include_label,
                                                                                      positive, negative, note)

@@ -93,7 +93,7 @@ def year_absolute_recognition(line, placeholders_list: dict):
 
 def year_relative_recognition(line, placeholders_list: dict):
     now_year = ['最近一年', '近一年', '最近1年', '近1年', '近年']
-    cur_year = ['本年', '今年', '这年']
+    cur_year = ['本年度', '本年', '今年', '这年']
     next_year = ['下1年', '下一年', '下年', '明年', '一年后']
     last_year = ['上1年', '上一年', '上年', '去年', '一年前']
     flag = True

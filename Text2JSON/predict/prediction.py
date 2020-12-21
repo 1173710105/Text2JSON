@@ -46,7 +46,9 @@ class GenJSON(object):
         self.model1 = model1
         self.model2 = model2
 
-    def generate(self, question, first_json=1, sec_json=1, qid=0):
+    def gen_json(self, question, first_json=1, sec_json=1, qid=0, size=50):
+        self.config['schema_evaluator_batch_size'] = size
+        self.config['column_evaluator_batch_size'] = size
         example = self.question_pre_handle(question, qid)
         self.schema_data.load_for_predict(example, True)
         schema_model_outputs = self.model1.dataset_inference(self.schema_data)
@@ -70,7 +72,6 @@ class GenJSON(object):
                 sec_table_rel.append(table_index)
                 if len(first_table_rel) == int(self.config['schema_remain']):
                     break
-        result = []
         # 先不考虑剪枝
         if len(first_table_rel) == 0:
             result = {'qid': qid, 'question': question, 'query': []}
@@ -94,7 +95,7 @@ class GenJSON(object):
                 first_request, first_relation = self.sql_parser(self.model2, first_schema_id, input_feature,
                                                                 model_output, 0)
                 if len(sec_table_rel) == 0:
-                    result.append({'qid': qid, 'question': question, 'query': [first_request.to_dict()]})
+                    result = {'qid': qid, 'question': question, 'query': [first_request.to_dict()]}
                     continue
                 for sql2_index, sec_schema_id in enumerate(sec_table_rel):
                     if sql2_index == int(sec_json):
@@ -158,12 +159,15 @@ class GenJSON(object):
             value_span_text = []
             for se in span_list:
                 # 获取是第几个词
-                # print(input_feature.subword_to_word[wc])
-                # print(span_list)
-                word_start = input_feature.subword_to_word[wc][se[0]]
-                word_end = input_feature.subword_to_word[wc][se[1]] + 1
+                start_index = se[0]
+                end_index = se[1]
+                if start_index >= len(input_feature.subword_to_word[wc]):
+                    start_index = len(input_feature.subword_to_word[wc]) - 1
+                if end_index >= len(input_feature.subword_to_word[wc]):
+                    end_index = len(input_feature.subword_to_word[wc]) - 1
+                word_start = input_feature.subword_to_word[wc][start_index]
+                word_end = input_feature.subword_to_word[wc][end_index] + 1
                 span = ''.join(input_feature.tokens_common[word_start:word_end]).rstrip()
-                # print('span', word_start, word_end, input_feature.tokens_common, span)
                 for stop_word in stop_word_list:
                     if stop_word in span:
                         span.replace(stop_word, '')
@@ -362,11 +366,9 @@ class Predict(object):
         # 选择模型, 加载模型
         self.model1 = model.model1
         self.model2 = model.model2
-
         # 数据加载器
         self.schema_data = model.schema_data
         self.column_data = model.column_data
-
         # 预测器
         self.prediction = model.prediction
 
@@ -374,5 +376,5 @@ class Predict(object):
         dump_model(self, model_path)
         print('Client model saved in path {0}'.format(model_path))
 
-    def predict(self, question, first_sql=1, sec_sql=1, qid=0):
-        return self.prediction.generate(question, first_sql, sec_sql, qid)
+    def predict(self, question, first_sql=1, sec_sql=1, qid=0, size=50):
+        return self.prediction.gen_json(question, first_sql, sec_sql, qid, size)

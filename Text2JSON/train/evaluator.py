@@ -5,6 +5,7 @@ path = dirname(dirname(dirname(abspath(__file__))))
 sys.path.append(path)
 from Text2JSON.train import utils
 from Text2JSON.predict.prediction import Predict
+import datetime
 
 
 def f_one(label_file, predict_file):
@@ -18,8 +19,6 @@ def f_one(label_file, predict_file):
     sum_params_op_acc, sum_params_value_acc, sum_rel_acc = 0., 0., 0., 0., 0., 0.
 
     for qid in label_data.keys():
-        # print(qid)
-
         label = label_data[qid]
         predict = predit_data[qid]
         label_query = label['query']
@@ -190,9 +189,6 @@ def f_one(label_file, predict_file):
             params_value_acc += (sec_layer_acc + 0.0001) / (float(len(predict_value_dict.keys()) + 0.0001))
         params_value_acc = (params_value_acc + 0.0001) / (float(len(predict_params_value.keys()) + 0.0001))
 
-        # print('recall', method_recall, url_recall, params_name_recall, params_op_recall, params_value_recall)
-        # print('acc', method_acc, url_acc, params_name_acc, params_op_acc, params_value_acc)
-
         sum_method_recall += method_recall
         sum_url_recall += url_recall
         sum_params_name_recall += params_name_recall
@@ -266,7 +262,6 @@ def bleu_one(label_file, predict_file):
     for qid in label_data.keys():
         label = label_data[qid]
         predict = predit_data[qid]
-        print(label)
         label_query = label['query']
         predict_query = predict['query']
 

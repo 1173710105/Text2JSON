@@ -49,6 +49,8 @@ def gen_processed_schema(source, target):
             value_space = param['value_space']
             value_range = param['value_range']
             value_note = param['value_note']
+            if param_name == 'order':
+                continue
             if value_space == 'closed':
                 for index, value in enumerate(value_range):
                     schema.header.append(param_name+'&'+value)

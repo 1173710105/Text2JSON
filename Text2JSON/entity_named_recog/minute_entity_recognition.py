@@ -6,6 +6,7 @@ import datetime
 import re
 from datetime import timedelta
 from Text2JSON.entity_named_recog.hour_entity_recognition import hour_absolute_comfirm
+from Text2JSON.entity_named_recog.entity_utils import *
 
 
 def minute_recon(line, placeholders_list: dict):

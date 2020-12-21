@@ -63,8 +63,6 @@ def read_conf(conf_path):
             sharp_index = len(line)
         fields = line[:sharp_index].split(" ")
         config[fields[0]] = fields[1]
-    config["train_data_path"] = os.path.abspath(config["train_data_path"])
-    config["dev_data_path"] = os.path.abspath(config["dev_data_path"])
     return config
 
 

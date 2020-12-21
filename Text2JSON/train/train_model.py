@@ -17,13 +17,21 @@ from Text2JSON.predict.prediction import Predict
 
 
 class ModelTrain(object):
-    def __init__(self, conf_path, output_path):
+    def __init__(self, conf_path, output_path, train_data_path, dev_data_path, schema_path, bert_path):
         """
             param: conf_path 配置文件路径
             param: output_path 模型输出路径
         """
         # 记载模型路径
         self.config = utils.read_conf(conf_path)
+        # 训练数据存放位置
+        self.config['train_data_path'] = train_data_path
+        # 验证数据存放位置
+        self.config['dev_data_path'] = dev_data_path
+        # URL 处理后存放的路径
+        self.config['schema_path'] = schema_path
+        # 语言预训练模型存放位置
+        self.config['bert_path'] = bert_path
         # 模型输出位置
         self.output_path = output_path
         # 加载tokenizer
@@ -42,16 +50,6 @@ class ModelTrain(object):
             self.config['has_cuda'] = False
 
     def train_column(self):
-        # 加载模型
-        model = HydraColumnTorch(self.config)
-        if self.config['has_cuda']:
-            model.to_gpu()
-        # 加载验证数据， 分别是eval column, eval table
-        eval_data = load_eval_column_data(self.config, self.schema, self.column_featurizer, True, True, negative=False,
-                                          note=True)
-        # 加载验证器
-        evaluator = ColumnEvaluator(self.output_path, self.config, model, eval_data)
-
         # 记载训练数据，并将训练数据封装到dataloader中
         train_data = load_train_column_data(self.config, self.schema, self.column_featurizer, True, True, False,
                                             note=True)
@@ -67,7 +65,16 @@ class ModelTrain(object):
                                                            batch_size=int(self.config["neg_column_train_batch_size"]),
                                                            shuffle=True,
                                                            pin_memory=True)
+        # 加载验证数据， 分别是eval column, eval table
+        eval_data = load_eval_column_data(self.config, self.schema, self.column_featurizer, True, True, negative=False,
+                                          note=True)
 
+        # 加载模型
+        model = HydraColumnTorch(self.config)
+        if self.config['has_cuda']:
+            model.to_gpu()
+        # 加载验证器
+        evaluator = ColumnEvaluator(self.output_path, self.config, model, eval_data)
         # 设置训练步数
         num_samples = len(train_data)  # 训练样本总数量
         self.config["column_num_train_steps"] = int(
@@ -111,17 +118,6 @@ class ModelTrain(object):
         del model
 
     def train_schema(self):
-        # 加载模型
-        model = HydraSchemaTorch(self.config)
-        if self.config['has_cuda']:
-            model.to_gpu()
-        # 加载验证数据， 分别是eval column
-        eval_schema_data = load_dev_schema_data(self.config, self.schema, self.schema_featurizer, True, True, True,
-                                                note=True)
-
-        # 加载验证器
-        evaluator = SchemaEvaluator(self.output_path, self.config, model, eval_schema_data)
-
         # 加载正样本train table data
         train_schema_data = load_train_schema_data(self.config, self.schema, self.schema_featurizer, True, True,
                                                    negative=False, note=True)
@@ -137,6 +133,15 @@ class ModelTrain(object):
                                                                       self.config["neg_schema_train_batch_size"]),
                                                                   shuffle=True,
                                                                   pin_memory=True)
+        # 加载验证数据， 分别是eval column
+        eval_schema_data = load_dev_schema_data(self.config, self.schema, self.schema_featurizer, True, True, True,
+                                                note=True)
+        # 加载模型
+        model = HydraSchemaTorch(self.config)
+        if self.config['has_cuda']:
+            model.to_gpu()
+        # 加载验证器
+        evaluator = SchemaEvaluator(self.output_path, self.config, model, eval_schema_data)
 
         num_samples = len(train_schema_data_loader)  # 训练样本总数量
         self.config["schema_num_train_steps"] = int(
@@ -199,3 +204,7 @@ class ModelTrain(object):
         predict.set_params(self.config, self.tokenizer, self.schema_featurizer,
                            self.column_featurizer, self.schema, schema_model, column_model)
         predict.dump_model(os.path.join(self.output_path, "model.pt"))
+
+        # 删除子模型
+        os.remove(os.path.join(self.output_path, "model_schema.pt"))
+        os.remove(os.path.join(self.output_path, "model_column.pt"))

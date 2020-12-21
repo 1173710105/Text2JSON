@@ -3,6 +3,7 @@ from os.path import dirname, abspath
 path = dirname(dirname(dirname(abspath(__file__))))
 sys.path.append(path)
 from Text2JSON.train.utils import load_jsonl_by_key, load_jsonl, dump_jsonl
+from Text2JSON.entity_named_recog.entity_recognition import entity_recognition
 
 
 class ProcessedData:
@@ -53,6 +54,7 @@ def gen_processed_data(source, target, table_file):
     for line in load_jsonl(source):
         qid = line['qid']
         question = line['question'].replace(' ', '').strip()
+        question = entity_recognition(question)
         tokens = [char for char in question]
         question_tokens = ' '.join(tokens)+' '
         train = ProcessedData()
@@ -76,59 +78,62 @@ def gen_processed_data(source, target, table_file):
 
         # 完整query语句
         train.sql['relationship'] = 1 if len(line['query']) == 2 else 0
-        for k in range(0, len(line['query'])):
-            temp_query = line['query'][k]
-            # 获取表名
-            table_name = temp_query['url']
-            # 获取表头
-            header = [value for value in tables[table_name]['header']]
+        try:
+            for k in range(0, len(line['query'])):
+                temp_query = line['query'][k]
+                # 获取表名
+                table_name = temp_query['url']
+                # 获取表头
+                header = [value for value in tables[table_name]['header']]
 
-            # 设置table数据
-            train.table_id.append(tables[table_name]['id'])
+                # 设置table数据
+                train.table_id.append(tables[table_name]['id'])
 
-            # select_clause 所涉及到的列, 默认加上一个占位符, 如果后续不在
-            select_list = []
-            # select_clause 所涉及到的列集合运算符
-            agg_list = []
-            # where_clause 所涉及到的列，操作符，值
-            cond_list = []
+                # select_clause 所涉及到的列, 默认加上一个占位符, 如果后续不在
+                select_list = []
+                # select_clause 所涉及到的列集合运算符
+                agg_list = []
+                # where_clause 所涉及到的列，操作符，值
+                cond_list = []
 
-            if 'params' not in temp_query.keys():
-                '不用加占位符'
-            else:
-                for l in range(0, len(temp_query['params'])):
-                    temp_param = temp_query['params'][l]
-                    col = temp_param['name']
-                    option = temp_param['option']
-                    value = temp_param['value']
-                    value_list = value.replace('[', '').replace(']', '').replace('"', '').split(',')
-                    flag = value_in_question(question, value_list)
-                    if flag:
-                        cond_list.append(Condition(col, option, value))
-                    else:
-                        for value in value_list:
-                            select_list.append(col + '&' + value)
-                            agg_list.append(option)
+                if 'params' not in temp_query.keys():
+                    '不用加占位符'
+                else:
+                    for l in range(0, len(temp_query['params'])):
+                        temp_param = temp_query['params'][l]
+                        col = temp_param['name']
+                        option = temp_param['option']
+                        value = temp_param['value']
+                        value_list = value.replace('[', '').replace(']', '').replace('"', '').split(',')
+                        flag = value_in_question(question, value_list)
+                        if flag:
+                            cond_list.append(Condition(col, option, value))
+                        else:
+                            for value in value_list:
+                                select_list.append(col + '&' + value)
+                                agg_list.append(option)
 
-            # 解析sql语句,并且设置train数据
-            value_start_end = {}
-            sel = [header.index(sel_col) for sel_col in select_list]
-            agg = [agg_map[agg] for agg in agg_list]
-            conditions = []
-            for con in cond_list:
-                conditions.extend(con.parse_with_table(op_map, tables[table_name]))
-            for condition in conditions:
-                value_list = condition[3]
-                for value in value_list:
-                    value_start_end[value] = find_token_start_end(question_tokens, question, value)
-            train.sql['clause'].append({'seq': k, 'sel': sel, 'agg': agg,
-                                        'conds': conditions,
-                                        'value_start_end': value_start_end})
+                # 解析sql语句,并且设置train数据
+                value_start_end = {}
+                sel = [header.index(sel_col) for sel_col in select_list]
+                agg = [agg_map[agg] for agg in agg_list]
+                conditions = []
+                for con in cond_list:
+                    conditions.extend(con.parse_with_table(op_map, tables[table_name]))
+                for condition in conditions:
+                    value_list = condition[3]
+                    for value in value_list:
+                        value_start_end[value] = find_token_start_end(question_tokens, question, value)
+                train.sql['clause'].append({'seq': k, 'sel': sel, 'agg': agg,
+                                            'conds': conditions,
+                                            'value_start_end': value_start_end})
 
-        # # 设置train数据
-        train.question = ' '.join(tokens)+' '
-        train.valid = True
-        train_sql_list.append(train)
+            # # 设置train数据
+            train.question = ' '.join(tokens)+' '
+            train.valid = True
+            train_sql_list.append(train)
+        except ValueError:
+            print('数据解析错误, qid={0}的标注数据无法识别'.format(qid))
 
     # 导出到文件中
     dump_jsonl([sql.to_dict() for sql in train_sql_list], target)

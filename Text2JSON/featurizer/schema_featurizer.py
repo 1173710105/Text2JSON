@@ -108,9 +108,12 @@ class HydraSchemaFeaturizer(object):
             for table_column_feature in table[feature_type]:
                 # 编码，输入为type, table, column, table_note, column_note, space, token
                 # 输出[cls]type, table, column, table_note, column_note, space[SEP]question[SEP]
-                assert len(table_column_feature) <= max_column_length, "列特征长度过小，请将配置文件中的max_column_length增大"
-                assert len(''.join(tokens)) <= max_query_length, "输入问句长度大于最大字符长度，请将配置文件中的max_query_length" \
-                                                                 "增大或者缩短输入问句长度"
+                assert len(
+                    table_column_feature) <= max_column_length, "{0} URL中参数特征长度过大，请缩小参数参数特征或将配置文件中的" \
+                                                                "max_column_length增大".format(table['url'])
+                assert len(''.join(
+                    tokens)) <= max_query_length, '问句: {0} 输入问句长度大于最大字符长度，请将配置文件中的max_query_length' \
+                                                  '增大或者缩短输入问句长度'.format(example.question)
                 tokenize_result = self.tokenizer.encode_plus(
                     table_column_feature,
                     tokens,
