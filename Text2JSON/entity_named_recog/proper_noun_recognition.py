@@ -25,12 +25,3 @@ def proper_recon(line, placeholders_list: dict):
         elif flag:
             char_span += char
     return line
-
-# if __name__ == '__main__':
-#     line = '我想看一下“xx民事纠纷“的“二审”判决书'
-#     placeholders_list = {}
-#     line = proper_noun_recon(line, placeholders_list)
-#     for holder, data in placeholders_list.items():
-#         line = line.replace(holder, data[0])
-#     print(line)
-#     print(placeholders_list)

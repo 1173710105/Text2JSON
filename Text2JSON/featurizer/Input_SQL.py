@@ -71,6 +71,3 @@ class SQLExample(object):
             example.valid = valid
             example_list.append(example)
         return example_list
-
-if __name__ == "__main__":
-    ''

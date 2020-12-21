@@ -233,22 +233,3 @@ def quarter_relative_absolute_recognition(line, placeholders_list: dict):
                 break
 
     return line
-
-
-if __name__ == '__main__':
-    ''
-    # example1 = '12年第1季度，16年第二季度，2017年第三季度，2019年第四季度，最近一个季度，上季度，下季度'
-    # example2 = '今年第一季度，去年第二季度，明年第三季度，第四季度'
-    # example3 = '17年上半年，下半年，今年下半年，明年上半年'
-    # sentence, placeholders = quarter_relatice_absolute_recon(example1)
-    # for token, holder in placeholders:
-    #     sentence = sentence.replace(holder, token)
-    # print(sentence)
-    # sentence, placeholders = quarter_relatice_absolute_recon(example2)
-    # for token, holder in placeholders:
-    #     sentence = sentence.replace(holder, token)
-    # print(sentence)
-    # sentence, placeholders = quarter_relatice_absolute_recon(example3)
-    # for token, holder in placeholders:
-    #     sentence = sentence.replace(holder, token)
-    # print(sentence)
