@@ -661,3 +661,7 @@ class ColumnDataset(torch_data.Dataset):
 
     def __getitem__(self, idx):
         return {k: v[idx] for k, v in self.model_inputs.items()}
+
+
+if __name__ == "__main__":
+    ''

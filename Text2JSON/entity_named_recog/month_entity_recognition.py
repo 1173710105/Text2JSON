@@ -359,3 +359,57 @@ def month_relative_comfirm(line, placeholders_list: dict):
                 line = line[:index]
                 return line, year, month
     return line, year, month
+
+
+if __name__ == '__main__':
+    ''
+    # placeholders = {}
+    # example1 = '明年11月, 今年12月'
+    # sentence = month_recon(example1, placeholders)
+    # for holder, data in placeholders.items():
+    #     sentence = sentence.replace(holder, data[0])
+    # print(example1)
+    # print('10', sentence)
+    # example1 = '最近一个月， 最近一个月'
+    # placeholders_list = []
+    # sentence, placeholders = month_absolute_recon(example1)
+    # placeholders_list.extend(placeholders)
+    # sentence, placeholders = month_relative_recon(sentence)
+    # placeholders_list.extend(placeholders)
+    # for token, holder in placeholders_list:
+    #     sentence = sentence.replace(holder, token)
+    # print(sentence)
+    #
+    # example2 = '去年2月，今年6月份，下年7月，16年6月，2017年十二月，16年二月, 一六年十一月，二零零零年十二月'
+    # placeholders_list = []
+    # sentence, placeholders = month_absolute_recon(example2)
+    # placeholders_list.extend(placeholders)
+    # sentence, placeholders = month_relative_recon(sentence)
+    # placeholders_list.extend(placeholders)
+    # for token, holder in placeholders_list:
+    #     sentence = sentence.replace(holder, token)
+    # print(sentence)
+    #
+    # example3 = 'sss12月, 去年12月'
+    # example4 = 'sss十二月, 今年二月'
+    # sentence, year, month = month_absolute_comfirm(example3)
+    # print(sentence, year, month)
+    # sentence, year, month = month_absolute_comfirm(example4)
+    # print(sentence, year, month)
+    # example4 = 'sss十二月, 明年四月'
+    # sentence, year, month = month_absolute_comfirm(example4)
+    # print(sentence, year, month)
+    # example4 = 'sss十二月, 19年四月'
+    # sentence, year, month = month_absolute_comfirm(example4)
+    # print(sentence, year, month)
+    # example4 = 'sss十二月, 零零年四月'
+    # sentence, year, month = month_absolute_comfirm(example4)
+    # print(sentence, year, month)
+    #
+    # example5 = 'sss下一个月'
+    # sentence, year, month = month_relative_comfirm(example5)
+    # print(sentence, year, month)
+    #
+    # example5 = 'sss上一个月'
+    # sentence, year, month = month_relative_comfirm(example5)
+    # print(sentence, year, month)

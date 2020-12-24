@@ -51,6 +51,7 @@ class HydraColumnTorch(BaseModel):
         if self.config['has_cuda']:
             for k, v in batch.items():
                 batch[k] = v.to(torch.device("cuda:0"))
+
         # 默认调用model.forward函数
         batch_loss = torch.mean(self.column_model(**batch)["loss"])  # 计算loss
 

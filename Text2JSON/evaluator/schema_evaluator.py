@@ -100,3 +100,7 @@ class SchemaEvaluator:
     def append(self, state, result_str):
         with open(self.eval_history_file, "a+", encoding="utf8") as f:
             f.write("[{0}, {1}] ".format(self.config['dev_data_path'], state) + result_str + "\n")
+
+
+
+

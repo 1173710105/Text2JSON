@@ -72,6 +72,7 @@ class GenJSON(object):
                 sec_table_rel.append(table_index)
                 if len(first_table_rel) == int(self.config['schema_remain']):
                     break
+        result = None
         # 先不考虑剪枝
         if len(first_table_rel) == 0:
             result = {'qid': qid, 'question': question, 'query': []}
@@ -346,10 +347,12 @@ class Predict(object):
     def load_to_gpu(self):
         self.model1.to_gpu()
         self.model2.to_gpu()
+        self.config['has_cuda'] = True
 
     def load_to_cpu(self):
         self.model1.to_cpu()
         self.model2.to_cpu()
+        self.config['has_cuda'] = False
 
     def load_model(self, model_path):
         model = load_model(model_path)
