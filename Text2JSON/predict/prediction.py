@@ -72,6 +72,7 @@ class GenJSON(object):
                 sec_table_rel.append(table_index)
                 if len(first_table_rel) == int(self.config['schema_remain']):
                     break
+
         result = None
         # 先不考虑剪枝
         if len(first_table_rel) == 0:
@@ -258,7 +259,7 @@ class GenJSON(object):
                                                                         or select_name_agg[col_name][0] == 'in'
                            else str(select_name_value[col_name][0])})
         for col_name, op_name, value in where_params:
-            params.append({'name': col_name, 'option': op_name, 'value': str(value)})
+            params.append({'name': col_name, 'option': op_name, 'value': str([value]) if op_name == 'in' else [value]})
 
         return params
 
@@ -374,6 +375,7 @@ class Predict(object):
         self.column_data = model.column_data
         # 预测器
         self.prediction = model.prediction
+        self.config['has_cuda'] = False
 
     def dump_model(self, model_path):
         dump_model(self, model_path)
