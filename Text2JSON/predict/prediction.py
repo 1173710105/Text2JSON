@@ -211,6 +211,9 @@ class GenJSON(object):
                 value = value_list
             else:
                 value = value_list[0]
+                value = value.replace('”', '')
+                value = value.replace('"', '')
+                value = ['"' + str(value) + '"']
             where_params.append((col_name, op_name, value))
 
         # 合并同类项
@@ -259,7 +262,9 @@ class GenJSON(object):
                                                                         or select_name_agg[col_name][0] == 'in'
                            else str(select_name_value[col_name][0])})
         for col_name, op_name, value in where_params:
-            params.append({'name': col_name, 'option': op_name, 'value': str([value]) if op_name == 'in' else [value]})
+            if op_name != 'in' and len(value) == 1:
+                value = value[0].replace('"', '')
+            params.append({'name': col_name, 'option': op_name, 'value': str(value)})
 
         return params
 
