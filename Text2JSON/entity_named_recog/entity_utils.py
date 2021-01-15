@@ -18,7 +18,7 @@ def time_to_str(tem_date):
 
 
 def random_str(slen=15):
-    seed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*()_+="
+    seed = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
     sa = []
     for i in range(slen):
         sa.append(random.choice(seed))

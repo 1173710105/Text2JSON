@@ -30,8 +30,10 @@ class HydraColumnTorch(BaseModel):
                 "params": [p for n, p in self.column_model.named_parameters() if not any(nd in n for nd in no_decay)],
                 "weight_decay": float(self.config["decay"]),
             },
-            {"params": [p for n, p in self.column_model.named_parameters() if any(nd in n for nd in no_decay)],
-             "weight_decay": 0.0},
+            {
+                "params": [p for n, p in self.column_model.named_parameters() if any(nd in n for nd in no_decay)],
+                "weight_decay": 0.0
+            },
         ]
         # AdamW是实现了权重衰减的优化器
         self.optimizer = transformers.AdamW(optimizer_grouped_parameters,

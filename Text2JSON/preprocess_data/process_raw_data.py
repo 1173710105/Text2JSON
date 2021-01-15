@@ -36,7 +36,8 @@ class Condition:
         self.col = col
         self.op = op
         self.value = value
-        self.value_list = value.replace('[', '').replace(']', '').replace('"', '').split(',')
+        self.value_list = value.replace('[', '').replace(']', '').\
+            replace('"', '').replace("'", '').replace(' ', '').split(',')
 
     def parse_with_table(self, op_map, table):
         return [[table['header'].index(self.col), op_map[self.op], len(self.value_list), self.value_list]]
@@ -104,7 +105,8 @@ def gen_processed_data(source, target, table_file):
                         col = temp_param['name']
                         option = temp_param['option']
                         value = temp_param['value']
-                        value_list = value.replace('[', '').replace(']', '').replace('"', '').split(',')
+                        value_list = value.replace('[', '').replace(']', '').\
+                            replace('"', '').replace("'", '').replace(' ', '').split(',')
                         flag = value_in_question(question, value_list)
                         if flag:
                             cond_list.append(Condition(col, option, value))
