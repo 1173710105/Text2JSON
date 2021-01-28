@@ -74,7 +74,7 @@ if __name__ == '__main__':
     line = entity_recognition(example2)
     print(example2)
     print(line)
-    example3 = "帮我用办公用品采购合同范本创建一个合同，金额30万，相对方是北京慧点科技有限公司"
+    example3 = "帮我用办公用品采购合同范本创建一个合同，金额30万，相对方是“北京慧点科技有限公司”"
     line = entity_recognition(example3, ['北京慧点科技有限公司'])
     print(example3)
     print(line)

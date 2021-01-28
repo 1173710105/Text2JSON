@@ -2,8 +2,8 @@ import sys
 from os.path import dirname, abspath
 path = dirname(dirname(dirname(abspath(__file__))))
 sys.path.append(path)
-from Text2JSON.train.utils import load_jsonl_by_key, load_jsonl, dump_jsonl
-from Text2JSON.entity_named_recog.entity_recognition import entity_recognition
+from Text2JSON.train.utils import load_jsonl_by_key, load_jsonl, dump_jsonl, read_vocab, ranking_by_length
+from Text2JSON.entity_named_recog.entity_recognition import entity_recognition, entity_recognition_with_value_list
 
 
 class ProcessedData:
@@ -43,7 +43,13 @@ class Condition:
         return [[table['header'].index(self.col), op_map[self.op], len(self.value_list), self.value_list]]
 
 
-def gen_processed_data(source, target, table_file):
+def gen_processed_data(source, target, table_file, proper_noun_file_list):
+    # 读取专有名词
+    proper_noun_list = []
+    for file_path in proper_noun_file_list:
+        proper_noun_list.extend(read_vocab(file_path))
+    # 按长度进行排序，保证最长匹配优先
+    proper_noun_list = ranking_by_length(proper_noun_list)
     # 记录操作符映射规则
     # cond_ops = ['=', '!=', '>', '<', '>=', '<=', 'like', 'isnull', 'notnull', 'OP']
     op_map = {'': 0, 'eq': 1, 'not': 2, 'gt': 3, 'lt': 4, 'gte': 5, 'lte': 6, 'like': 7,
@@ -55,7 +61,7 @@ def gen_processed_data(source, target, table_file):
     for line in load_jsonl(source):
         qid = line['qid']
         question = line['question'].replace(' ', '').strip()
-        question = entity_recognition(question)
+        question = entity_recognition(question, proper_noun_list)
         tokens = [char for char in question]
         question_tokens = ' '.join(tokens)+' '
         train = ProcessedData()
@@ -107,6 +113,7 @@ def gen_processed_data(source, target, table_file):
                         value = temp_param['value']
                         value_list = value.replace('[', '').replace(']', '').\
                             replace('"', '').replace("'", '').replace(' ', '').split(',')
+                        value_list = entity_recognition_with_value_list(value_list, proper_noun_list)
                         flag = value_in_question(question, value_list)
                         if flag:
                             cond_list.append(Condition(col, option, value))
