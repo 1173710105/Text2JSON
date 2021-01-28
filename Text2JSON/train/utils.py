@@ -51,6 +51,28 @@ def dump_probablity(data, path):
             file_obj.writelines(str(qid) + ' ' + str(line) + '\n')
 
 
+def read_vocab(path):
+    result_list = []
+    with open(path, 'r', encoding='utf8')as fp:
+        for line in fp:
+            result_list.append(line.rstrip())
+    return result_list
+
+
+def ranking_by_length(noun_list):
+    vocab_map = {}
+    result_list = []
+    for noun in noun_list:
+        if len(noun) not in vocab_map.keys():
+            vocab_map[len(noun)] = [noun]
+        else:
+            vocab_map[len(noun)].append(noun)
+    key_list = sorted(vocab_map.keys(), reverse=True)
+    for key in key_list:
+        result_list.extend(vocab_map[key])
+    return result_list
+
+
 def read_conf(conf_path):
     config = {}
     for line in open(conf_path, encoding="utf8"):
@@ -78,3 +100,8 @@ def create_tokenizer(config):
         return transformers.BertTokenizer.from_pretrained(config['bert_path'])
     except Exception:
         raise Exception("base_path {0} not supported".format(config['bert_path']))
+
+
+if __name__ == '__main__':
+    a_list = ['一审', '二审', '三审', '大疆科技有限公司', '北京慧点科技有限公司']
+    print(ranking_by_length(a_list))

@@ -2,8 +2,8 @@ import sys
 from os.path import dirname, abspath
 path = dirname(dirname(dirname(abspath(__file__))))
 sys.path.append(path)
-from Text2JSON.train.utils import load_jsonl, dump_jsonl
-from Text2JSON.entity_named_recog.entity_recognition import entity_recognition
+from Text2JSON.train.utils import load_jsonl, dump_jsonl, read_vocab, ranking_by_length
+from Text2JSON.entity_named_recog.entity_recognition import entity_recognition, entity_recognition_with_value_list
 
 
 class RawSchema(object):
@@ -45,13 +45,18 @@ class RawParam(object):
 
 
 # 将完整的URL作为一个表名
-def extract(source: list, target):
+def extract(source: list, target, proper_noun_file_list):
+    # 读取专有名词
+    proper_noun_list = []
+    for file_path in proper_noun_file_list:
+        proper_noun_list.extend(read_vocab(file_path))
+    # 按长度进行排序，保证最长匹配优先
+    proper_noun_list = ranking_by_length(proper_noun_list)
     cnt = 1
     schema_dict = {}
     for data in source:
         for line in load_jsonl(data):
-            # 进行两轮抽取，第一次不解析，第二次解析
-            question = entity_recognition(line['question'])
+            question = entity_recognition(line['question'], proper_noun_list)
             for query in line['query']:
                 schema_name = query['url']
                 method = query['method']
@@ -71,6 +76,7 @@ def extract(source: list, target):
                     if param_name == 'order':
                         continue
                     value_list = param['value'].replace('[', '').replace(']', '').replace('"', '').split(',')
+                    value_list = entity_recognition_with_value_list(value_list, proper_noun_list)
                     flag = value_in_question(question, value_list)
                     if flag:
                         if param_name in now_schema.params.keys():

@@ -5,7 +5,11 @@ sys.path.append(path)
 from Text2JSON.entity_named_recog.entity_utils import *
 
 
-def proper_recon(line, placeholders_list: dict):
+def proper_recon(line, placeholders_list: dict, proper_noun_list):
+    # 保证最长匹配
+    for noun in proper_noun_list:
+        if noun in line:
+            line = line.replace(noun, '“'+noun+'”')
     char_span = ''
     flag = False
     for char in line:

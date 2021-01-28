@@ -136,8 +136,8 @@ def day_absolute_recognition(line, placeholders_list: dict):
 
 
 def day_relative_recognition(line, placeholders_list: dict):
-    cur_day = ['今天', '这天']
-    next_day = ['明天', '下一天', '一天后', '后一天']
+    cur_day = ['今天', '这天', '今']
+    next_day = ['明天', '下一天', '一天后', '后一天', '明']
     last_day = ['昨天', '上一天', '一天前', '前一天']
     day_map = {'一': '1', '二': '2', '三': '3', '四': '4',
                '五': '5', '六': '6', '七': '7', '八': '8', '九': '9', '两': '2', '十': '10'}
@@ -320,8 +320,8 @@ def day_relative_recognition(line, placeholders_list: dict):
 
 
 def day_relative_comfirm(line, placeholders_list: dict):
-    cur_day = ['今天', '这天']
-    next_day = ['明天', '下一天', '一天后', '后一天', '下1天', '1天后', '后1天']
+    cur_day = ['今天', '这天', '今']
+    next_day = ['明天', '下一天', '一天后', '后一天', '下1天', '1天后', '后1天', '明']
     last_day = ['昨天', '上一天', '一天前', '前一天', '上一天', '一天前', '前一天']
     day_map = {'一': '1', '二': '2', '三': '3', '四': '4',
                '五': '5', '六': '6', '七': '7', '八': '8', '九': '9', '两': '2'}

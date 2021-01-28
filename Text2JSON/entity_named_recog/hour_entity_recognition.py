@@ -22,12 +22,14 @@ def hour_absolute_recognition(line, placeholders_list: dict):
     # 数字 上午
     date_all_morning_1 = re.findall(r"(上午\d{1,2}点)", line)
     date_all_morning_2 = re.findall(r"(早上\d{1,2}点)", line)
-    for data in date_all_morning_1 + date_all_morning_2:
+    date_all_morning_3 = re.findall(r"(早\d{1,2}点)", line)
+    for data in date_all_morning_1 + date_all_morning_2 + date_all_morning_3:
         index = line.index(data)
         first_line = line[0: index]
         sec_line = line[index + len(data):]
         hour_minute = re.sub(r'(上午)', '', data)
         hour_minute = re.sub(r'(早上)', '', hour_minute)
+        hour_minute = re.sub(r'(早)', '', hour_minute)
         hour_minute = hour_minute.replace('点', ':')
 
         # 确定年月日
@@ -63,15 +65,15 @@ def hour_absolute_recognition(line, placeholders_list: dict):
 
     # 数字 下午, 傍晚，晚上
     date_all_afternoon = re.findall(r"(下午\d{1,2}点)", line)
-    date_all_nightfall = re.findall(r"(傍晚\d{1,2}点)", line)
+    date_all_nightfall = re.findall(r"([傍]?晚\d{1,2}点)", line)
     date_all_night = re.findall(r"(晚上\d{1,2}点)", line)
     for data in date_all_afternoon + date_all_nightfall + date_all_night:
         index = line.index(data)
         first_line = line[0: index]
         sec_line = line[index + len(data):]
         hour_minute = re.sub(r'(下午)', '', data)
-        hour_minute = re.sub(r'(傍晚)', '', hour_minute)
         hour_minute = re.sub(r'(晚上)', '', hour_minute)
+        hour_minute = re.sub(r'([傍]?晚)', '', hour_minute)
         hour_minute = hour_minute.replace('点', ':')
         # 确定年月日
         handle_line, year, month, day = day_relative_comfirm(first_line, placeholders_list)
@@ -234,12 +236,14 @@ def hour_absolute_recognition(line, placeholders_list: dict):
     # 中文 上午
     date_all_morning_1 = re.findall(r"(上午[二]?[十]?[零两一二三四五六七八九十]点)", line)
     date_all_morning_2 = re.findall(r"(早上[二]?[十]?[零两一二三四五六七八九十]点)", line)
-    for data in date_all_morning_1 + date_all_morning_2:
+    date_all_morning_3 = re.findall(r"(早[二]?[十]?[零两一二三四五六七八九十]点)", line)
+    for data in date_all_morning_1 + date_all_morning_2 + date_all_morning_3:
         index = line.index(data)
         first_line = line[0: index]
         sec_line = line[index + len(data):]
         hour_minute = re.sub(r'(上午)', '', data)
         hour_minute = re.sub(r'(早上)', '', hour_minute)
+        hour_minute = re.sub(r'(早)', '', hour_minute)
         hour_minute = re.sub(r'(分)', '', hour_minute)
         hour_minute = re.sub(r'(钟)', '', hour_minute)
         hour_minute = hour_minute.replace('点', ':')
@@ -299,15 +303,15 @@ def hour_absolute_recognition(line, placeholders_list: dict):
 
     # 中文 下午
     date_all_afternoon = re.findall(r"(下午[二]?[十]?[两一二三四五六七八九十]点)", line)
-    date_all_nightfall = re.findall(r"(傍晚[二]?[十]?[两一二三四五六七八九十]点)", line)
+    date_all_nightfall = re.findall(r"([傍]?晚[二]?[十]?[两一二三四五六七八九十]点)", line)
     date_all_night = re.findall(r"(晚上[二]?[十]?[两一二三四五六七八九十]点)", line)
     for data in date_all_afternoon + date_all_nightfall + date_all_night:
         index = line.index(data)
         first_line = line[0: index]
         sec_line = line[index + len(data):]
         hour_minute = re.sub(r'(下午)', '', data)
-        hour_minute = re.sub(r'(傍晚)', '', hour_minute)
         hour_minute = re.sub(r'(晚上)', '', hour_minute)
+        hour_minute = re.sub(r'([傍]?晚)', '', hour_minute)
         hour_minute = re.sub(r'(分)', '', hour_minute)
         hour_minute = re.sub(r'(钟)', '', hour_minute)
         hour_minute = hour_minute.replace('点', ':')
