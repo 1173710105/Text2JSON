@@ -44,6 +44,8 @@ def quarter_relative_absolute_recognition(line, placeholders_list: dict):
                 line = first_line + placeholder + sec_line
                 flag = True
                 break
+        if flag:
+            continue
 
         for quarter in next_quarter:
             if quarter in line:
@@ -75,6 +77,9 @@ def quarter_relative_absolute_recognition(line, placeholders_list: dict):
                 flag = True
                 break
 
+        if flag:
+            continue
+
         for quarter in last_quarter:
             if quarter in line:
                 index = line.index(quarter)
@@ -104,6 +109,9 @@ def quarter_relative_absolute_recognition(line, placeholders_list: dict):
                 flag = True
                 break
 
+        if flag:
+            continue
+
         for quarter in first_quarter:
             if quarter in line:
                 index = line.index(quarter)
@@ -127,6 +135,9 @@ def quarter_relative_absolute_recognition(line, placeholders_list: dict):
                 flag = True
                 break
 
+        if flag:
+            continue
+
         for quarter in sec_quarter:
             if quarter in line:
                 index = line.index(quarter)
@@ -147,6 +158,9 @@ def quarter_relative_absolute_recognition(line, placeholders_list: dict):
                 line = first_line + placeholder + sec_line
                 flag = True
                 break
+
+        if flag:
+            continue
 
         for quarter in third_quarter:
             if quarter in line:
@@ -210,6 +224,8 @@ def quarter_relative_absolute_recognition(line, placeholders_list: dict):
                 line = first_line + placeholder + sec_line
                 flag = True
                 break
+        if flag:
+            continue
 
         for sec_half in sec_half_year:
             if sec_half in line:
@@ -231,7 +247,8 @@ def quarter_relative_absolute_recognition(line, placeholders_list: dict):
                 line = first_line + placeholder + sec_line
                 flag = True
                 break
-
+        if flag:
+            continue
     return line
 
 

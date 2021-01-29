@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="Text2JSON",
-    version="0.1.7",
+    version="0.1.9",
     author="Yucheng Zeng",
     author_email="yucheng-zeng@outlook.com",
     description="Text2JSON",

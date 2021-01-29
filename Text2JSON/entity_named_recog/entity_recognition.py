@@ -1,5 +1,6 @@
 import sys
 from os.path import dirname, abspath
+
 path = dirname(dirname(dirname(abspath(__file__))))
 sys.path.append(path)
 from Text2JSON.entity_named_recog.minute_entity_recognition import minute_recon
@@ -35,8 +36,33 @@ def entity_recognition(original_line, proper_noun_list=None):
     return line
 
 
+def only_parsing_time(original_line, proper_noun_list=None):
+    if proper_noun_list is None:
+        proper_noun_list = []
+    line = copy.deepcopy(original_line)
+    line = line.replace('：', ':')
+    line = line.replace(' ', '')
+    placeholders_list = {}
+    line = proper_recon(line, placeholders_list, proper_noun_list)
+    line = minute_recon(line, placeholders_list)
+    line = hour_recon(line, placeholders_list)
+    line = day_recon(line, placeholders_list)
+    line = month_recon(line, placeholders_list)
+    line = quart_recon(line, placeholders_list)
+    line = year_recon(line, placeholders_list)
+    for holder, data in placeholders_list.items():
+        line = line.replace(holder, data[0])
+    line = line.replace('““', '“')
+    line = line.replace('””', '”')
+    return line
+
+
+def only_paring_unit(original_line):
+    return ctd.takeChineseNumberFromString(original_line)['replacedText']
+
+
 def entity_recognition_with_value_list(value_list, proper_noun_list=None):
-    # 记录需要进行解析的词的下标
+    # 去除不需要解析的专有名词
     if proper_noun_list is None:
         proper_noun_list = []
     paring_index_list = []
@@ -44,28 +70,53 @@ def entity_recognition_with_value_list(value_list, proper_noun_list=None):
         if value not in proper_noun_list:
             paring_index_list.append(index)
 
+    parsed_result_list = []
     # 如果需要解析的词为空，则直接返回原本的value_list
     if len(paring_index_list) == 0:
         'do nothing'
     # 有可能是时间段
     elif len(paring_index_list) == 2:
-        original_line = value_list[paring_index_list[0]]+'到'+value_list[paring_index_list[1]]
-        result_list = entity_recognition(original_line).split('到')
-        value_list[paring_index_list[0]] = result_list[0].replace('“', '').replace('”', '')
-        value_list[paring_index_list[1]] = result_list[1].replace('“', '').replace('”', '')
+        line_1 = only_parsing_time(value_list[paring_index_list[0]], proper_noun_list)
+        line_2 = only_parsing_time(value_list[paring_index_list[1]], proper_noun_list)
+        # 解析前后没有变化，则不需要做时间解析，只需要做单位解析
+        if value_list[paring_index_list[0]] == line_1 and value_list[paring_index_list[1]] == line_2:
+            parsed_result_list.append(only_paring_unit(value_list[paring_index_list[0]]))
+            parsed_result_list.append(only_paring_unit(value_list[paring_index_list[1]]))
+        # 只需要解析第一个时间
+        elif value_list[paring_index_list[0]] != line_1 and value_list[paring_index_list[1]] == line_2:
+            parsed_result_list.extend([token.replace('“', '').replace('”', '') for token in line_1.split('”到“')])
+            parsed_result_list.append(only_paring_unit(value_list[paring_index_list[1]]))
+        # 只需要解析第二个
+        elif value_list[paring_index_list[0]] == line_1 and value_list[paring_index_list[1]] != line_2:
+            parsed_result_list.append(only_paring_unit(value_list[paring_index_list[0]]))
+            parsed_result_list.extend([token.replace('“', '').replace('”', '') for token in line_2.split('”到“')])
+        else:
+            original_line = value_list[paring_index_list[0]] + '到' + value_list[paring_index_list[1]]
+            parsed_line = only_parsing_time(original_line, proper_noun_list)
+            # 不是时间段
+            if original_line == parsed_line:
+                'do nothing'
+            else:
+                parsed_result_list.extend([token.replace('“', '').replace('”', '')
+                                           for token in parsed_line.split('”到“')])
     else:
         for index in paring_index_list:
             original_line = value_list[index]
-            value_list[index] = entity_recognition(original_line).replace('“', '').replace('”', '')
-    return value_list
+            parsed_line = only_parsing_time(original_line, proper_noun_list)
+            if parsed_line == original_line:
+                parsed_result_list.append(only_paring_unit(value_list[paring_index_list[0]]))
+            else:
+                parsed_result_list.extend(
+                    [token.replace('“', '').replace('”', '') for token in parsed_line.split('”到“')])
+    parsed_value_list = []
+    for index, value in enumerate(value_list):
+        if index not in paring_index_list:
+            parsed_value_list.append(value)
+    parsed_value_list.extend(parsed_result_list)
+    return parsed_value_list
 
 
-if __name__ == '__main__':
-    ''
-    # value_list = ['2021年01月28日', '01月29日']
-    # proper_noun_list = ['一审', '二审', '三审']
-    # print(entity_recognition_with_value_list(value_list, proper_noun_list))
-
+def test_entity_recognition():
     example1 = "帮我查一下最近1个月内有哪些范本有新的评价"
     line = entity_recognition(example1)
     print(example1)
@@ -118,6 +169,7 @@ if __name__ == '__main__':
     line = entity_recognition(example13)
     print(example13)
     print(line)
+    ''
     example14 = "帮我查一下本季度，上一季度，下一季度，最近一个季度，上季度，下季度"
     line = entity_recognition(example14)
     print(example14)
@@ -221,3 +273,69 @@ if __name__ == '__main__':
     print(example29)
     print(line)
 
+    example29 = '上一季度'
+    line = entity_recognition(example29)
+    print(example29)
+    print(line)
+
+    example29 = '五小时后'
+    line = entity_recognition(example29)
+    print(example29)
+    print(line)
+
+    example29 = '上午9点到10点'
+    line = entity_recognition(example29)
+    print(example29)
+    print(line)
+
+
+def test_entity_recognition_with_value_list():
+    value_list = ['2021年01月28日', '01月29日']
+    proper_noun_list = ['一审', '二审', '三审']
+    result = entity_recognition_with_value_list(value_list, proper_noun_list)
+    print(result)
+
+    value_list = ['一', '二']
+    proper_noun_list = ['一审', '二审', '三审']
+    result = entity_recognition_with_value_list(value_list, proper_noun_list)
+    print(result)
+
+    value_list = ['最近一个月']
+    proper_noun_list = ['一审', '二审', '三审']
+    result = entity_recognition_with_value_list(value_list, proper_noun_list)
+    print(result)
+
+    value_list = ['本季度']
+    proper_noun_list = ['一审', '二审', '三审']
+    result = entity_recognition_with_value_list(value_list, proper_noun_list)
+    print(result)
+
+    value_list = ['第一季度', '第二季度']
+    proper_noun_list = ['一审', '二审', '三审']
+    result = entity_recognition_with_value_list(value_list, proper_noun_list)
+    print(result)
+
+    value_list = ['张三', '第二季度']
+    proper_noun_list = ['一审', '二审', '三审', '张三']
+    result = entity_recognition_with_value_list(value_list, proper_noun_list)
+    print(result)
+
+    value_list = ['2021年01月28日', '2021年01月29日']
+    proper_noun_list = ['一审', '二审', '三审']
+    result = entity_recognition_with_value_list(value_list, proper_noun_list)
+    print(result)
+
+    value_list = ['今天', '明天']
+    proper_noun_list = ['一审', '二审', '三审']
+    result = entity_recognition_with_value_list(value_list, proper_noun_list)
+    print(result)
+
+    value_list = ['明早9点', '12点']
+    proper_noun_list = ['一审', '二审', '三审']
+    result = entity_recognition_with_value_list(value_list, proper_noun_list)
+    print(result)
+
+
+if __name__ == '__main__':
+    # test_entity_recognition()
+    test_entity_recognition_with_value_list()
