@@ -104,7 +104,7 @@ def entity_recognition_with_value_list(value_list, proper_noun_list=None):
             original_line = value_list[index]
             parsed_line = only_parsing_time(original_line, proper_noun_list)
             if parsed_line == original_line:
-                parsed_result_list.append(only_paring_unit(value_list[paring_index_list[0]]))
+                parsed_result_list.append(only_paring_unit(value_list[paring_index_list[index]]))
             else:
                 parsed_result_list.extend(
                     [token.replace('“', '').replace('”', '') for token in parsed_line.split('”到“')])
@@ -331,6 +331,11 @@ def test_entity_recognition_with_value_list():
     print(result)
 
     value_list = ['明早9点', '12点']
+    proper_noun_list = ['一审', '二审', '三审']
+    result = entity_recognition_with_value_list(value_list, proper_noun_list)
+    print(result)
+
+    value_list = ['AJJJ', 'BJJJ', 'CJJJ', 'DJJJ']
     proper_noun_list = ['一审', '二审', '三审']
     result = entity_recognition_with_value_list(value_list, proper_noun_list)
     print(result)
